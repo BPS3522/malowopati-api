@@ -10,9 +10,11 @@ import { HonormitraService } from './honormitra/honormitra.service';
 import { HonormitraController } from './honormitra/honormitra.controller';
 import { HonormitraModule } from './honormitra/honormitra.module';
 import { KegiatanModule } from './kegiatan/kegiatan.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [PrismaModule, MitraModule, KegiatanmitraModule, BatashonorModule, FilesModule, HonormitraModule, KegiatanModule],
+  imports: [PrismaModule, MitraModule, KegiatanmitraModule, BatashonorModule, FilesModule, HonormitraModule, KegiatanModule, AuthModule, UsersModule],
   controllers: [AppController, HonormitraController],
   providers: [AppService, HonormitraService],
 })

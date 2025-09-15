@@ -1,6 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 import fs from 'fs';
 import csv from 'csv-parser';
+import { resolve } from 'path';
+import { rejects } from 'assert';
+import { User } from 'src/users/dto/user.dto';
 
 const prisma = new PrismaClient();
 
@@ -36,7 +39,6 @@ async function main() {
       })
       .on('end', async () => {
         if (mitraResults.length > 0) {
-          await prisma.mitra.deleteMany({});
           await prisma.mitra.createMany({ 
             data: mitraResults,   
             skipDuplicates: true 
@@ -48,28 +50,49 @@ async function main() {
       .on('error', reject);
   });
 
+  async function usersSeed(){
+    const usersSeed=[
+      {
+        username : 'bpsbojonegoro',
+        password: "Sem4ng4t45"
+      }
+    ]
+      try {
+        await prisma.users.deleteMany()
+    const result = await prisma.users.createMany({
+      data: usersSeed,
+    });
+      console.log(`Seeding complete. ${result.count} users created.`);
+    } catch (e) {
+      console.error('Seeding failed:', e);
+    } finally {
+      console.log('✅ Seed Users selesai.');
+      await prisma.$disconnect();
+    }
+  }
+
   //Seed Batas Honor Mitra
-  const batasHonor = new Promise<void>((resolve, reject) => {
-    fs.createReadStream('prisma/batashonor.csv')
-      .pipe(csv({ separator: ';' }))
-      .on('data', (data) => {
-        batasHonorResults.push({
-          nama_posisi: data['nama posisi'],
-          biaya: parseInt(data['biaya']),
-          keterangan: data['keterangan'],
-          flag: parseInt(data['flag']),
-        });
-      })
-      .on('end', async () => {
-        if (batasHonorResults.length > 0) {
-          await prisma.batasHonor.deleteMany({});
-          await prisma.batasHonor.createMany({ data: batasHonorResults });
-          console.log('✅ Seed Batas Honor selesai.');
-        }
-        resolve();
-      })
-      .on('error', reject);
-  });
+  // const batasHonor = new Promise<void>((resolve, reject) => {
+  //   fs.createReadStream('prisma/batashonor.csv')
+  //     .pipe(csv({ separator: ';' }))
+  //     .on('data', (data) => {
+  //       batasHonorResults.push({
+  //         nama_posisi: data['nama posisi'],
+  //         biaya: parseInt(data['biaya']),
+  //         keterangan: data['keterangan'],
+  //         flag: parseInt(data['flag']),
+  //       });
+  //     })
+  //     .on('end', async () => {
+  //       if (batasHonorResults.length > 0) {
+  //         await prisma.batasHonor.deleteMany({});
+  //         await prisma.batasHonor.createMany({ data: batasHonorResults });
+  //         console.log('✅ Seed Batas Honor selesai.');
+  //       }
+  //       resolve();
+  //     })
+  //     .on('error', reject);
+  // });
 
     // Seed Kegiatan Mitra
   // const kegiatanPromise = new Promise<void>((resolve, reject) => {
@@ -110,8 +133,9 @@ async function main() {
   //     })
   //     .on('error', reject);
   // });
-
-  await Promise.all([mitraPromise, batasHonor]);
+  
+  usersSeed()
+  await Promise.all([mitraPromise]);
 }
 
 main()

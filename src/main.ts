@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-         origin: ['https://sim-20-sistem-20-integrasi-20-mitra.vercel.app'],
+        origin: ['http://localhost:8081'],
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     });

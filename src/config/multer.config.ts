@@ -12,7 +12,8 @@ export const multerConfig = {
     },
   }),
   fileFilter: (req, file, callback) => {
-    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',]
     if (allowedMimes.includes(file.mimetype)) {
       callback(null, true);
     } else {
