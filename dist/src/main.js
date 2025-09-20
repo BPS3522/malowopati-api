@@ -9,6 +9,14 @@ async function bootstrap() {
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     });
+    app.use((req, res, next) => {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('Surrogate-Control', 'no-store');
+        next();
+    });
+    app.setGlobalPrefix('api6');
     await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
