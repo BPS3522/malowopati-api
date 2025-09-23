@@ -4,6 +4,7 @@ import csv from 'csv-parser';
 import { resolve } from 'path';
 import { rejects } from 'assert';
 import { User } from 'src/users/dto/user.dto';
+import * as bcrypt from 'bcrypt-ts';
 
 const prisma = new PrismaClient();
 
@@ -54,7 +55,7 @@ async function main() {
     const usersSeed=[
       {
         username : 'bpsbojonegoro',
-        password: "Sem4ng4t45"
+        password: await bcrypt.hash("Sem4ng4t45", 10)
       }
     ]
       try {

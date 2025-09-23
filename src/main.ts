@@ -1,11 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Cors
   app.enableCors({
-        origin: ['http://localhost:8081'],
+        origin: true,
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     });
@@ -18,6 +19,11 @@ async function bootstrap() {
       res.setHeader('Surrogate-Control', 'no-store');
       next();
   });
+
+  // Middleware for cookies
+  app.use(cookieParser());
+
+  // app.use(Credential)
 
   // Prefix
   app.setGlobalPrefix('api6');

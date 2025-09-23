@@ -4,4 +4,5 @@ export declare class UsersService {
     private prisma;
     constructor(prisma: PrismaService);
     findOne(username: string): Promise<User | null>;
+    getAll(): Promise<User[] | null>;
 }

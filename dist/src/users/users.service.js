@@ -24,6 +24,9 @@ let UsersService = class UsersService {
             }
         });
     }
+    async getAll() {
+        return this.prisma.users.findMany();
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
