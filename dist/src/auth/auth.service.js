@@ -93,47 +93,36 @@ let AuthService = class AuthService {
             secure: true,
             sameSite: "none",
             maxAge: 24 * 60 * 60 * 1000,
-            path: '/',
         });
         return {
             access_token: accessToken,
         };
     }
     async refresh(req, res) {
-        console.log('--- Menerima permintaan refresh token ---');
-        console.log('Request Origin:', req.headers.origin);
-        console.log('Cookies yang diterima:', req.cookies);
         const cookies = req.cookies;
         if (!cookies?.jwt) {
-            console.log('Gagal: Cookie "jwt" tidak ditemukan.');
             throw new common_1.ForbiddenException('Refresh token tidak ditemukan');
         }
         const refreshToken = cookies.jwt;
         try {
             const decoded = this.jwtService.verify(refreshToken, { secret: constants_1.refreshJwtConstants.secret });
-            console.log('Token berhasil diverifikasi. Username:', decoded.username, 'ID:', decoded.sub);
             const tokens = await this.prismaService.tokens.findMany({
                 where: { userId: decoded.sub }
             });
-            console.log(`Ditemukan ${tokens.length} token di DB untuk user ini.`);
             let isValid = false;
             for (const t of tokens) {
                 if (await bcrypt.compare(refreshToken, t.token)) {
                     isValid = true;
-                    console.log('Berhasil: Refresh token cocok dengan yang di database.');
                     break;
                 }
             }
             if (!isValid) {
-                console.log('Gagal: Token dari cookie tidak cocok dengan token yang di DB.');
                 throw new common_1.ForbiddenException('Refresh token tidak valid atau telah dicabut.');
             }
-            const newAccessToken = this.jwtService.sign({ sub: decoded.sub, username: decoded.username }, { secret: constants_1.refreshJwtConstants.secret, expiresIn: '30s' });
-            console.log('Berhasil: Access token baru dibuat dan dikirim.');
+            const newAccessToken = this.jwtService.sign({ sub: decoded.sub, username: decoded.username }, { secret: constants_1.jwtConstants.secret, expiresIn: '30s' });
             return { access_token: newAccessToken };
         }
         catch (err) {
-            console.log('Terjadi kesalahan:', err.message);
             if (err.name === 'TokenExpiredError') {
                 throw new common_1.ForbiddenException('Refresh token kedaluwarsa. Silakan login ulang.');
             }
