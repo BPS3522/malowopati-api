@@ -32,4 +32,15 @@ export declare class HonormitraController {
             total: number;
         }[];
     }>;
+    getHonorMitraWithKegiatan(year?: string, month?: string): Promise<{
+        status_code: number;
+        message: string;
+        data: {
+            id: number;
+            sobatId: string;
+            namaLengkap: string;
+            jumlahKegiatan: number;
+            honor: number;
+        }[];
+    }>;
 }

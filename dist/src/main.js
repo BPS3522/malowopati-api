@@ -9,7 +9,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
-        origin: true,
+        origin: ['https://malowopati.web.bps.go.id', "http://localhost:8081"],
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     });

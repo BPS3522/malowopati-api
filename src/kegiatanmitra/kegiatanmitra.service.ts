@@ -11,9 +11,16 @@ import { isEmpty } from 'class-validator';
 export class KegiatanmitraService {
     constructor(private prisma: PrismaService) {}
   
-    async getKegiatanMitra() {
+    async getKegiatanMitra(filters: any) {
+      const {month, year, tim} = filters
+
     const result = await this.prisma.kegiatan.findMany(
       {
+        where:{
+            ...( month ? { bulan: month} : {} ),
+            ...( year ? { tahun: Number(year)} : {} ),
+            ...( tim ? { tim: tim} : {} ),
+        },
         include:{
           mitra: true,
         }
@@ -30,6 +37,86 @@ export class KegiatanmitraService {
       }
     })
     return result
+  }
+
+  async countMitraKegiatanHonor(filters: any){
+    const {year, month, idSobat} = filters
+
+    const query: Prisma.MitraFindManyArgs = {
+    where: {
+      ...( idSobat ? { sobatId: idSobat} : {} ),
+    },
+    include: {
+        KegiatanMitra:{
+          where:{
+            ...( idSobat ? { id_sobat: idSobat} : {} ),
+            ...( year ? { tahun: Number(year)} : {} ),
+            ...( month ? { bulan: month} : {} ),
+          }
+        },
+        honors:{
+            where:{
+                ...(year ? {tahun: Number(year)} : {}),
+                ...(idSobat ? {sobatId: idSobat} : {})
+            }
+        },
+        _count: {
+          select: {
+            KegiatanMitra:{
+              where:{
+                ...( idSobat ? { id_sobat: idSobat} : {} ),
+                ...( year ? { tahun: Number(year)} : {} ),
+                ...( month ? { bulan: month} : {} ),
+              }
+            },
+            honors:{
+              where:{
+                ...( idSobat ? { sobatId: idSobat} : {} ),
+                ...( year ? { tahun: Number(year)} : {} ),
+              }
+            },
+          },
+        },
+      }
+  };
+
+  const kegMitra: Prisma.KegiatanMitraFindManyArgs = {
+    where:{
+      ...( idSobat ? { id_sobat: idSobat} : {} ),
+      ...( year ? { tahun: Number(year)} : {} ),
+      ...( month ? { bulan: month} : {} ),
+    }
+  }
+
+  const honorMitra= await this.prisma.honor.findMany({
+    where:{
+        ...( idSobat ? { sobatId: idSobat} : {} ),
+        ...( year ? { tahun: Number(year)} : {} ),
+      }
+  })
+  const honorDataWithTotal = honorMitra.map((item)=>(
+  {
+      total:item.januari + item.februari + item.maret + item.april + item.mei + item.juni + item.juli + item.agustus + item.september + item.oktober + item.november + item.desember
+  }))
+
+  const sumHonor = honorDataWithTotal.reduce((sum, item)=>{
+    return(
+      sum + item.total
+    )
+  },0)
+
+    const [mitra, countMitra, countKegiatanMitra] = await this.prisma.$transaction([
+      this.prisma.mitra.findMany(query),
+      this.prisma.mitra.count({where: query.where}),
+      this.prisma.kegiatanMitra.count({where: kegMitra.where}),
+    ])
+
+    return{
+      mitra,
+      countMitra,
+      countKegiatanMitra,
+      sumHonor
+    }
   }
 
   async countKegiatanMitra(year : number) {
@@ -84,7 +171,7 @@ export class KegiatanmitraService {
       data: {
         bulan: dataKegiatan.bulan,
         tanggal: dataKegiatan.tanggal,
-        tim: dataKegiatan.tim,
+        tim: dataKegiatan.tim || '',
         nama_survei: dataKegiatan.nama_survei,
         nama_survei_sobat: dataKegiatan.nama_survei_sobat,
         kegiatan: dataKegiatan.kegiatan,

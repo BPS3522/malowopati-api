@@ -22,8 +22,8 @@ let KegiatanmitraController = class KegiatanmitraController {
     constructor(KegiatanmitraService) {
         this.KegiatanmitraService = KegiatanmitraService;
     }
-    async getKegiatanMitra() {
-        const kegiatanmitra = await this.KegiatanmitraService.getKegiatanMitra();
+    async getKegiatanMitra(year, month, tim) {
+        const kegiatanmitra = await this.KegiatanmitraService.getKegiatanMitra({ year, month, tim });
         return {
             status_code: 200,
             message: 'Succes get all kegiatan mitra',
@@ -66,6 +66,15 @@ let KegiatanmitraController = class KegiatanmitraController {
             data: result,
         };
     }
+    async countMitraKegiatanHonor(year, month, idSobat) {
+        const tahun = Number(year);
+        const result = await this.KegiatanmitraService.countMitraKegiatanHonor({ year, month, idSobat });
+        return {
+            status_code: 200,
+            message: 'Get jumlah kegiatan mitra success',
+            data: result,
+        };
+    }
     async getKegiatanMitraById(id) {
         const idMitra = Number(id);
         return this.KegiatanmitraService.getKegiatanMitraById(idMitra);
@@ -87,8 +96,11 @@ let KegiatanmitraController = class KegiatanmitraController {
 exports.KegiatanmitraController = KegiatanmitraController;
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('year')),
+    __param(1, (0, common_1.Query)('month')),
+    __param(2, (0, common_1.Query)('tim')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], KegiatanmitraController.prototype, "getKegiatanMitra", null);
 __decorate([
@@ -120,6 +132,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], KegiatanmitraController.prototype, "countKegiatanMitra", null);
+__decorate([
+    (0, common_1.Get)('count/'),
+    __param(0, (0, common_1.Query)('year')),
+    __param(1, (0, common_1.Query)('month')),
+    __param(2, (0, common_1.Query)('idSobat')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], KegiatanmitraController.prototype, "countMitraKegiatanHonor", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

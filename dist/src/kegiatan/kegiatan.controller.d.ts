@@ -18,8 +18,20 @@ export declare class KegiatanController {
             kodeKegiatan: string;
         };
     }>;
-    getClassByPengajarId(tahun: string): Promise<{
+    getRekapKegiatan(tahun: string): Promise<{
         bulan: string;
         kegiatan: any;
     }[]>;
+    getRekapKegiatanByTim(year?: string, month?: string, idSobat?: string): Promise<{
+        grouped: {
+            id: string;
+            label: string;
+            value: number;
+        }[];
+        total: number;
+    }>;
+    deleteJawaban(id: string): Promise<{
+        status_code: number;
+        message: string;
+    }>;
 }

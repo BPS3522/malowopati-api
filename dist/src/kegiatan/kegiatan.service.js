@@ -37,6 +37,29 @@ let KegiatanService = class KegiatanService {
         });
         return result;
     }
+    async getKegiatanById(id) {
+        return this.prisma.kegiatan.findUnique({
+            where: { id },
+        });
+    }
+    async deleteKegiatan(id) {
+        const kegiatan = await this.getKegiatanById(id);
+        let kodeKegiatan = '';
+        if (!kegiatan) {
+            throw new common_1.NotFoundException(`Kegiatan dengan ID ${id} tidak ditemukan.`);
+        }
+        else {
+            kodeKegiatan = kegiatan.kodeKegiatan;
+        }
+        await this.prisma.kegiatanMitra.deleteMany({
+            where: {
+                kegiatanId: kodeKegiatan
+            }
+        });
+        return this.prisma.kegiatan.delete({
+            where: { id },
+        });
+    }
     async getRekapKegiatan(tahun) {
         const kegiatan = await this.prisma.kegiatan.findMany({
             where: {
@@ -65,6 +88,40 @@ let KegiatanService = class KegiatanService {
             kegiatan: rekapKegiatan[bulan],
         }));
         return result;
+    }
+    async getKegiatanByTim(filters) {
+        const { year, month, idSobat } = filters;
+        const kegiatan = await this.prisma.kegiatanMitra.groupBy({
+            by: ['tim', 'nama_survei'],
+            where: {
+                ...(idSobat ? { id_sobat: idSobat } : {}),
+                ...(year ? { tahun: Number(year) } : {}),
+                ...(month ? { bulan: month } : {}),
+            },
+            _count: { _all: true },
+        });
+        const groupedObj = kegiatan.reduce((acc, item) => {
+            if (!acc[item.tim]) {
+                acc[item.tim] = {
+                    id: item.tim,
+                    label: item.tim,
+                    value: 0,
+                };
+            }
+            acc[item.tim].value += 1;
+            return acc;
+        }, {});
+        const grouped = Object.values(groupedObj);
+        const countKegiatan = await this.prisma.kegiatan.count({
+            where: {
+                ...(year ? { tahun: Number(year) } : {}),
+                ...(month ? { bulan: month } : {}),
+            }
+        });
+        return {
+            grouped,
+            total: countKegiatan
+        };
     }
 };
 exports.KegiatanService = KegiatanService;

@@ -16,8 +16,38 @@ export declare class KegiatanService {
         tahun: number;
         kodeKegiatan: string;
     }>;
+    getKegiatanById(id: number): Promise<{
+        id: number;
+        kegiatan: string | null;
+        bulan: string;
+        tanggal: string;
+        tim: string | null;
+        nama_survei: string;
+        nama_survei_sobat: string | null;
+        tahun: number;
+        kodeKegiatan: string;
+    } | null>;
+    deleteKegiatan(id: number): Promise<{
+        id: number;
+        kegiatan: string | null;
+        bulan: string;
+        tanggal: string;
+        tim: string | null;
+        nama_survei: string;
+        nama_survei_sobat: string | null;
+        tahun: number;
+        kodeKegiatan: string;
+    }>;
     getRekapKegiatan(tahun: number): Promise<{
         bulan: string;
         kegiatan: any;
     }[]>;
+    getKegiatanByTim(filters: any): Promise<{
+        grouped: {
+            id: string;
+            label: string;
+            value: number;
+        }[];
+        total: number;
+    }>;
 }

@@ -29,9 +29,21 @@ let KegiatanController = class KegiatanController {
             data: response,
         };
     }
-    async getClassByPengajarId(tahun) {
+    async getRekapKegiatan(tahun) {
         const year = Number(tahun);
         return this.kegiatanService.getRekapKegiatan(year);
+    }
+    async getRekapKegiatanByTim(year, month, idSobat) {
+        const tahun = Number(year);
+        return this.kegiatanService.getKegiatanByTim({ tahun, month, idSobat });
+    }
+    async deleteJawaban(id) {
+        const kegiatanId = Number(id);
+        await this.kegiatanService.deleteKegiatan(kegiatanId);
+        return {
+            status_code: 200,
+            message: 'Kegiatan berhasil dihapus',
+        };
     }
 };
 exports.KegiatanController = KegiatanController;
@@ -48,7 +60,23 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], KegiatanController.prototype, "getClassByPengajarId", null);
+], KegiatanController.prototype, "getRekapKegiatan", null);
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('year')),
+    __param(1, (0, common_1.Query)('month')),
+    __param(2, (0, common_1.Query)('idSobat')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], KegiatanController.prototype, "getRekapKegiatanByTim", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], KegiatanController.prototype, "deleteJawaban", null);
 exports.KegiatanController = KegiatanController = __decorate([
     (0, common_1.Controller)('kegiatan'),
     __metadata("design:paramtypes", [kegiatan_service_1.KegiatanService])

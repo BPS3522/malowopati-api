@@ -4,13 +4,13 @@ import { Prisma } from '@prisma/client';
 export declare class KegiatanmitraService {
     private prisma;
     constructor(prisma: PrismaService);
-    getKegiatanMitra(): Promise<({
+    getKegiatanMitra(filters: any): Promise<({
         mitra: {
             id: number;
             kegiatan: string | null;
             bulan: string;
             tanggal: string;
-            tim: string | null;
+            tim: string;
             nama_survei: string;
             nama_survei_sobat: string | null;
             pcl_pml_olah: string | null;
@@ -42,7 +42,7 @@ export declare class KegiatanmitraService {
             kegiatan: string | null;
             bulan: string;
             tanggal: string;
-            tim: string | null;
+            tim: string;
             nama_survei: string;
             nama_survei_sobat: string | null;
             pcl_pml_olah: string | null;
@@ -77,6 +77,31 @@ export declare class KegiatanmitraService {
         sobatId: string;
         email: string | null;
     }) | null>;
+    countMitraKegiatanHonor(filters: any): Promise<{
+        mitra: {
+            id: number;
+            namaLengkap: string;
+            posisi: string | null;
+            statusSeleksi: string | null;
+            posisiDaftar: string | null;
+            alamatDetail: string | null;
+            alamatProv: number | null;
+            alamatKab: number | null;
+            alamatKec: number | null;
+            alamatDesa: number | null;
+            tempatTanggalLahir: string | null;
+            jenisKelamin: string | null;
+            pendidikan: string | null;
+            pekerjaan: string | null;
+            deskripsiPekerjaan: string | null;
+            noTelp: string | null;
+            sobatId: string;
+            email: string | null;
+        }[];
+        countMitra: number;
+        countKegiatanMitra: number;
+        sumHonor: number;
+    }>;
     countKegiatanMitra(year: number): Promise<{
         id: number;
         namaLengkap: string;
@@ -87,7 +112,7 @@ export declare class KegiatanmitraService {
         kegiatan: string | null;
         bulan: string;
         tanggal: string;
-        tim: string | null;
+        tim: string;
         nama_survei: string;
         nama_survei_sobat: string | null;
         pcl_pml_olah: string | null;

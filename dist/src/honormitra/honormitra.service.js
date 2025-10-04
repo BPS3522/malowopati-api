@@ -67,7 +67,66 @@ let HonormitraService = class HonormitraService {
             ...item,
             total: item.januari + item.februari + item.maret + item.april + item.mei + item.juni + item.juli + item.agustus + item.september + item.oktober + item.november + item.desember
         }));
-        return detailHonorDataWithTotal;
+        const result = detailHonorDataWithTotal.sort((a, b) => b.total - a.total);
+        return result;
+    }
+    async getHonorMitraWithKegiatan(filters) {
+        const { year, month } = filters;
+        const dataMitra = await this.prisma.mitra.findMany({
+            include: {
+                _count: {
+                    select: {
+                        KegiatanMitra: {
+                            where: {
+                                ...(year ? { tahun: Number(year) } : {}),
+                                ...(month ? { bulan: month } : {})
+                            }
+                        },
+                    },
+                },
+                honors: {
+                    where: {
+                        ...(year ? { tahun: Number(year) } : {})
+                    }
+                }
+            }
+        });
+        const sortedData = dataMitra.sort((a, b) => {
+            return b._count.KegiatanMitra - a._count.KegiatanMitra;
+        });
+        const formattedData = sortedData.map((item) => {
+            const honorRecord = item.honors[item.honors.length - 1] || {};
+            let honor = 0;
+            if (month) {
+                honor = honorRecord[month.toLowerCase()] ?? 0;
+            }
+            else {
+                honor =
+                    (honorRecord.januari ?? 0) +
+                        (honorRecord.februari ?? 0) +
+                        (honorRecord.maret ?? 0) +
+                        (honorRecord.april ?? 0) +
+                        (honorRecord.mei ?? 0) +
+                        (honorRecord.juni ?? 0) +
+                        (honorRecord.juli ?? 0) +
+                        (honorRecord.agustus ?? 0) +
+                        (honorRecord.september ?? 0) +
+                        (honorRecord.oktober ?? 0) +
+                        (honorRecord.november ?? 0) +
+                        (honorRecord.desember ?? 0);
+            }
+            return {
+                id: item.id,
+                sobatId: item.sobatId,
+                namaLengkap: item.namaLengkap,
+                jumlahKegiatan: item._count.KegiatanMitra,
+                honor
+            };
+        });
+        const top10 = formattedData
+            .sort((a, b) => b.honor - a.honor)
+            .slice(0, 10);
+        return top10;
     }
     async getRekapHonorPerBulan(selectedYear) {
         const rekapPerbulan = await this.prisma.honor.findMany({

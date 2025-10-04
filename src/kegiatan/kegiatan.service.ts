@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { KegiatanDto } from './dto/kegiatan.dto';
 import { KegiatanmitraService } from 'src/kegiatanmitra/kegiatanmitra.service';
-import { retry } from 'rxjs';
+import { groupBy, retry } from 'rxjs';
 
 @Injectable()
 export class KegiatanService {
@@ -24,6 +24,33 @@ export class KegiatanService {
       },
     });
     return result;
+  }
+
+  async getKegiatanById(id: number) {
+    return this.prisma.kegiatan.findUnique({
+      where: { id },
+    });
+  }
+
+  async deleteKegiatan(id: number) {
+    const kegiatan = await this.getKegiatanById(id)
+    let kodeKegiatan =''
+    
+    if(!kegiatan){
+      throw new NotFoundException(`Kegiatan dengan ID ${id} tidak ditemukan.`);
+    } else{
+      kodeKegiatan = kegiatan.kodeKegiatan
+    }
+
+    await this.prisma.kegiatanMitra.deleteMany({
+      where:{
+        kegiatanId: kodeKegiatan
+      }
+    })
+    
+    return this.prisma.kegiatan.delete({
+      where: { id },
+    });
   }
 
  async getRekapKegiatan(tahun: number) {
@@ -66,5 +93,45 @@ export class KegiatanService {
     }));
 
     return result;
+  }
+
+  async getKegiatanByTim(filters: any){
+    const {year, month, idSobat} = filters
+
+      const kegiatan = await this.prisma.kegiatanMitra.groupBy({
+        by: ['tim','nama_survei'],
+        where: {
+              ...(idSobat ? { id_sobat: idSobat } : {}),
+          ...(year ? { tahun: Number(year) } : {}),
+          ...(month ? { bulan: month } : {}),
+        },
+        _count: { _all: true },
+      });
+
+      const groupedObj = kegiatan.reduce((acc, item) => {
+        if (!acc[item.tim]) {
+          acc[item.tim] = {
+            id: item.tim,
+            label: item.tim,
+            value: 0,
+          };
+        }
+        acc[item.tim].value += 1;
+        return acc;
+      }, {} as Record<string, { id: string; label: string; value: number }>);
+
+      const grouped = Object.values(groupedObj);
+
+      const countKegiatan = await this.prisma.kegiatan.count({
+        where: {
+          ...(year ? { tahun: Number(year) } : {}),
+          ...(month ? { bulan: month } : {}),
+        }
+      });
+
+    return {
+      grouped,
+      total: countKegiatan
+    }
   }
 }

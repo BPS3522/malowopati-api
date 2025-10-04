@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Cors
   app.enableCors({
-        origin: true,
+        origin: ['https://malowopati.web.bps.go.id', "http://localhost:8081"],
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     });

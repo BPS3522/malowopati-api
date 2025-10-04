@@ -22,6 +22,13 @@ export declare class HonormitraService {
         november: number;
         desember: number;
     }[]>;
+    getHonorMitraWithKegiatan(filters: any): Promise<{
+        id: number;
+        sobatId: string;
+        namaLengkap: string;
+        jumlahKegiatan: number;
+        honor: number;
+    }[]>;
     getRekapHonorPerBulan(selectedYear: number): Promise<{
         bulan: string;
         total: number;

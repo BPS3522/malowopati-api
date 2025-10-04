@@ -3,7 +3,7 @@ import { KegiatanMitraDto } from './dto/kegiatanmitra.dto';
 export declare class KegiatanmitraController {
     private readonly KegiatanmitraService;
     constructor(KegiatanmitraService: KegiatanmitraService);
-    getKegiatanMitra(): Promise<{
+    getKegiatanMitra(year?: string, month?: string, tim?: string): Promise<{
         status_code: number;
         message: string;
         data: ({
@@ -12,7 +12,7 @@ export declare class KegiatanmitraController {
                 kegiatan: string | null;
                 bulan: string;
                 tanggal: string;
-                tim: string | null;
+                tim: string;
                 nama_survei: string;
                 nama_survei_sobat: string | null;
                 pcl_pml_olah: string | null;
@@ -47,7 +47,7 @@ export declare class KegiatanmitraController {
             kegiatan: string | null;
             bulan: string;
             tanggal: string;
-            tim: string | null;
+            tim: string;
             nama_survei: string;
             nama_survei_sobat: string | null;
             pcl_pml_olah: string | null;
@@ -82,13 +82,42 @@ export declare class KegiatanmitraController {
             jumlahKegiatan: number;
         }[];
     }>;
+    countMitraKegiatanHonor(year?: string, month?: string, idSobat?: string): Promise<{
+        status_code: number;
+        message: string;
+        data: {
+            mitra: {
+                id: number;
+                namaLengkap: string;
+                posisi: string | null;
+                statusSeleksi: string | null;
+                posisiDaftar: string | null;
+                alamatDetail: string | null;
+                alamatProv: number | null;
+                alamatKab: number | null;
+                alamatKec: number | null;
+                alamatDesa: number | null;
+                tempatTanggalLahir: string | null;
+                jenisKelamin: string | null;
+                pendidikan: string | null;
+                pekerjaan: string | null;
+                deskripsiPekerjaan: string | null;
+                noTelp: string | null;
+                sobatId: string;
+                email: string | null;
+            }[];
+            countMitra: number;
+            countKegiatanMitra: number;
+            sumHonor: number;
+        };
+    }>;
     getKegiatanMitraById(id: number): Promise<({
         KegiatanMitra: {
             id: number;
             kegiatan: string | null;
             bulan: string;
             tanggal: string;
-            tim: string | null;
+            tim: string;
             nama_survei: string;
             nama_survei_sobat: string | null;
             pcl_pml_olah: string | null;

@@ -37,6 +37,14 @@ let HonormitraController = class HonormitraController {
             data: rekapHonorPerBulan,
         };
     }
+    async getHonorMitraWithKegiatan(year, month) {
+        const honorMitraWithKegiatan = await this.honorMitraService.getHonorMitraWithKegiatan({ year, month });
+        return {
+            status_code: 200,
+            message: 'Succes get rekap honor per bulan',
+            data: honorMitraWithKegiatan,
+        };
+    }
 };
 exports.HonormitraController = HonormitraController;
 __decorate([
@@ -52,6 +60,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], HonormitraController.prototype, "getRekapHonorPerBulan", null);
+__decorate([
+    (0, common_1.Get)('kegiatan'),
+    __param(0, (0, common_1.Query)('year')),
+    __param(1, (0, common_1.Query)('month')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], HonormitraController.prototype, "getHonorMitraWithKegiatan", null);
 exports.HonormitraController = HonormitraController = __decorate([
     (0, common_1.Controller)('honormitra'),
     __metadata("design:paramtypes", [honormitra_service_1.HonormitraService])

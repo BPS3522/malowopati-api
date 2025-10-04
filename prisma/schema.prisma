@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -61,7 +62,7 @@ model KegiatanMitra {
   id          Int      @id @default(autoincrement())
   bulan       String
   tanggal     String
-  tim         String?
+  tim         String
   nama_survei String
   nama_survei_sobat String?
   kegiatan    String?
