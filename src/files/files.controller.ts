@@ -15,7 +15,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { multerConfig } from '../config/multer.config';
 import { FilesService } from './files.service';
-import { FileUploadDto, FileResponseDto } from '../dto/file.dto';
+import { FileUploadDto, FileResponseDto } from './dto/file.dto';
 
 @Controller('files')
 export class FilesController {
@@ -48,14 +48,11 @@ export class FilesController {
 
     const results: FileResponseDto[] = [];
     for (const file of files) {
-      const result = await this.filesService.saveFileMetadata(
-        file,
-        fileUploadDto.description,
-      );
+      const result = await this.filesService.saveFileMetadata(file, fileUploadDto.description);
       results.push(result);
     }
-    
-   return {
+
+    return {
       status_code: 200,
       message: 'Succes create files',
       data: results,
@@ -64,10 +61,7 @@ export class FilesController {
 
   // GET: Download/View file by filename
   @Get('download/:filename')
-  async downloadFile(
-    @Param('filename') filename: string,
-    @Res() res: Response,
-  ): Promise<void> {
+  async downloadFile(@Param('filename') filename: string, @Res() res: Response): Promise<void> {
     try {
       const filePath = await this.filesService.getFilePath(filename);
       res.sendFile(filePath);
@@ -90,10 +84,7 @@ export class FilesController {
 
   // GET: Stream file (untuk file besar)
   @Get('stream/:filename')
-  async streamFile(
-    @Param('filename') filename: string,
-    @Res() res: Response,
-  ): Promise<void> {
+  async streamFile(@Param('filename') filename: string, @Res() res: Response): Promise<void> {
     try {
       await this.filesService.streamFile(filename, res);
     } catch (error) {

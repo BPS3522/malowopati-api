@@ -9,9 +9,9 @@ import { AuthGuard } from 'src/auth/auth.guard';
   providers: [
     BatashonorService,
     {
-          provide: APP_GUARD,
-          useClass: AuthGuard,
-        },
-  ]
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class BatashonorModule {}

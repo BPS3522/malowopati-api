@@ -66,14 +66,26 @@ let AuthService = class AuthService {
         if (!user) {
             throw new common_1.NotFoundException('User tidak ditemukan');
         }
+        const roles = await this.prismaService.usersRoles.findMany({
+            where: {
+                userId: user.id,
+            },
+            select: {
+                role: true,
+            },
+        });
         const isPasswordValid = await bcrypt.compare(pass, user.password);
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Password salah');
         }
-        const payload = { sub: user.id, username: user.username };
+        const payload = {
+            sub: user.id,
+            username: user.username,
+            roles: roles.map((r) => r.role.name),
+        };
         const accessToken = await this.jwtService.signAsync(payload, {
             secret: constants_1.jwtConstants.secret,
-            expiresIn: '20s',
+            expiresIn: '60s',
         });
         const refreshToken = await this.jwtService.signAsync(payload, {
             secret: constants_1.refreshJwtConstants.secret,
@@ -85,17 +97,22 @@ let AuthService = class AuthService {
                 token: hashedRefresh,
                 device: 'Chrome Windows',
                 expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-                userId: user.id
-            }
+                userId: user.id,
+            },
         });
         const cookie = res.cookie('jwt', refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: "none",
+            sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000,
         });
         return {
             access_token: accessToken,
+            user: {
+                id: user.id,
+                username: user.username,
+                roles: payload.roles,
+            },
         };
     }
     async refresh(req, res) {
@@ -107,7 +124,7 @@ let AuthService = class AuthService {
         try {
             const decoded = this.jwtService.verify(refreshToken, { secret: constants_1.refreshJwtConstants.secret });
             const tokens = await this.prismaService.tokens.findMany({
-                where: { userId: decoded.sub }
+                where: { userId: decoded.sub },
             });
             let isValid = false;
             for (const t of tokens) {
@@ -119,7 +136,7 @@ let AuthService = class AuthService {
             if (!isValid) {
                 throw new common_1.ForbiddenException('Refresh token tidak valid atau telah dicabut.');
             }
-            const newAccessToken = this.jwtService.sign({ sub: decoded.sub, username: decoded.username }, { secret: constants_1.jwtConstants.secret, expiresIn: '30s' });
+            const newAccessToken = this.jwtService.sign({ sub: decoded.sub, username: decoded.username, roles: decoded.roles }, { secret: constants_1.jwtConstants.secret, expiresIn: '60s' });
             return { access_token: newAccessToken };
         }
         catch (err) {
@@ -145,7 +162,7 @@ let AuthService = class AuthService {
             }
         }
         res.clearCookie('jwt', { httpOnly: true });
-        return res.statusMessage = "Berhasil logout";
+        return (res.statusMessage = 'Berhasil logout');
     }
 };
 exports.AuthService = AuthService;

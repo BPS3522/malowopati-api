@@ -17,7 +17,7 @@ const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_config_1 = require("../config/multer.config");
 const files_service_1 = require("./files.service");
-const file_dto_1 = require("../dto/file.dto");
+const file_dto_1 = require("./dto/file.dto");
 let FilesController = class FilesController {
     filesService;
     constructor(filesService) {

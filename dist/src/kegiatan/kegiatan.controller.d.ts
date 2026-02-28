@@ -9,12 +9,19 @@ export declare class KegiatanController {
         data: {
             id: number;
             kegiatan: string | null;
+            tahun: number;
+            judul: import("@prisma/client").$Enums.TypeKegiatan | null;
+            hari: string | null;
+            tanggal_mulai: Date | null;
             bulan: string;
-            tanggal: string;
+            bulan_angka: number | null;
+            hari_selesai: string | null;
+            tanggal_selesai: Date | null;
+            jenis_kegiatan: import("@prisma/client").$Enums.TypeKegiatan | null;
             tim: string | null;
             nama_survei: string;
             nama_survei_sobat: string | null;
-            tahun: number;
+            tanggal: string | null;
             kodeKegiatan: string;
         };
     }>;
@@ -30,8 +37,22 @@ export declare class KegiatanController {
         }[];
         total: number;
     }>;
-    deleteJawaban(id: string): Promise<{
-        status_code: number;
-        message: string;
+    deleteKegiatan(id: string): Promise<{
+        id: number;
+        kegiatan: string | null;
+        tahun: number;
+        judul: import("@prisma/client").$Enums.TypeKegiatan | null;
+        hari: string | null;
+        tanggal_mulai: Date | null;
+        bulan: string;
+        bulan_angka: number | null;
+        hari_selesai: string | null;
+        tanggal_selesai: Date | null;
+        jenis_kegiatan: import("@prisma/client").$Enums.TypeKegiatan | null;
+        tim: string | null;
+        nama_survei: string;
+        nama_survei_sobat: string | null;
+        tanggal: string | null;
+        kodeKegiatan: string;
     }>;
 }

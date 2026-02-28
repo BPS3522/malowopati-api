@@ -61,7 +61,7 @@ model Honor {
 model KegiatanMitra {
   id          Int      @id @default(autoincrement())
   bulan       String
-  tanggal     String
+  tanggal     String?
   tim         String
   nama_survei String
   nama_survei_sobat String?
@@ -76,6 +76,10 @@ model KegiatanMitra {
   konfirmasi  String?
   flag_sobat  String?
   tahun       Int
+  no_kontrak_spk  String?
+  no_kontrak_bast String?
+  no_urut_mitra Int?
+  kecamatan     String?
 
   kegiatanId        String?
   kegiatanMaster    Kegiatan?   @relation(fields: [kegiatanId], references: [kodeKegiatan])
@@ -104,15 +108,28 @@ model Files{
 model Kegiatan{
   id Int @id @default(autoincrement())
   bulan       String
-  tanggal     String
+  bulan_angka Int?
+  tanggal     String?
   tim         String?
   nama_survei String
   nama_survei_sobat String?
   kegiatan    String?
   tahun Int
   kodeKegiatan  String  @unique
+  judul      TypeKegiatan? @default(PENDATAAN_LAPANGAN)
+  hari       String?
+  tanggal_mulai DateTime?
+  hari_selesai String?
+  tanggal_selesai   DateTime?
+  jenis_kegiatan TypeKegiatan? @default(PENDATAAN_LAPANGAN)
 
   mitra             KegiatanMitra[]
+}
+
+enum TypeKegiatan{
+  PENDATAAN_LAPANGAN
+  PENGAWASAN_LAPANGAN
+  PENGOLAHAN_LAPANGAN
 }
 
 model Users{
@@ -120,6 +137,23 @@ model Users{
   username  String
   password String
   token Tokens[]
+  role UsersRoles[]
+}
+
+model UsersRoles{
+  user       Users     @relation(fields: [userId], references: [id])
+  userId     Int 
+  role      Roles @relation(fields: [rolesId], references: [id])
+  rolesId    Int
+
+  @@id([userId, rolesId])
+}
+
+model Roles{
+  id Int @id @default(autoincrement())
+  name String
+  kode Int
+  user UsersRoles[]
 }
 
 model Tokens{
@@ -131,4 +165,38 @@ model Tokens{
   userId Int
 
   user   Users? @relation(fields: [userId], references: [id])
+}
+
+model Keuangan{
+  id Int @id @default(autoincrement())
+  tim                       String
+  bulan_kegiatan            String
+  group_pok                 String
+  detail                    String
+  nomor_permintaan          Int
+  deskripsi                 String
+  nomor_surat               String
+  tipe_form                 String
+  dibuat_oleh               String
+  jumlah_usulan             Int
+  link_scan                 String
+  bulan_pembayaran          String
+  teknis_kirim_ke_umum      DateTime
+  ppk_cek_dokumen           String?
+  ppk_kirim_ke_ppspm        DateTime?
+  ppspm_cek_dokumen         String?
+  ppspm_kirim_ke_bendahara  DateTime?
+  bendahara_bayar           String?
+  no_spp                    String?
+  tanggal_spp               DateTime?
+  rekap_bos                 String?
+  realisasi_bos             String?
+
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+}
+
+model Tahun {
+  id Int @id @default(autoincrement())
+  year Int
 }

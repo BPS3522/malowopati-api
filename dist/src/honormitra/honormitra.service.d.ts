@@ -4,7 +4,7 @@ export declare class HonormitraService {
     constructor(prisma: PrismaService);
     private readonly rupiahFormatter;
     formatRupiah(value: number): string;
-    getHonorMitra(search?: string): Promise<{
+    getHonorMitra(filters: any): Promise<{
         total: number;
         id: number;
         namaLengkap: string;

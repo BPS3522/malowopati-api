@@ -1,11 +1,4 @@
-import { Controller,
-    Get,
-  Post,
-  Body,
-  Param,
-  Put,
-  Delete,
- } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { MitraService } from './mitra.service';
 
 @Controller('mitra')
@@ -22,5 +15,4 @@ export class MitraController {
       data: mitra,
     };
   }
-  
 }

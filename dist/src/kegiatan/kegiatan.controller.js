@@ -37,13 +37,9 @@ let KegiatanController = class KegiatanController {
         const tahun = Number(year);
         return this.kegiatanService.getKegiatanByTim({ tahun, month, idSobat });
     }
-    async deleteJawaban(id) {
+    async deleteKegiatan(id) {
         const kegiatanId = Number(id);
-        await this.kegiatanService.deleteKegiatan(kegiatanId);
-        return {
-            status_code: 200,
-            message: 'Kegiatan berhasil dihapus',
-        };
+        return this.kegiatanService.deleteKegiatan(kegiatanId);
     }
 };
 exports.KegiatanController = KegiatanController;
@@ -76,7 +72,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], KegiatanController.prototype, "deleteJawaban", null);
+], KegiatanController.prototype, "deleteKegiatan", null);
 exports.KegiatanController = KegiatanController = __decorate([
     (0, common_1.Controller)('kegiatan'),
     __metadata("design:paramtypes", [kegiatan_service_1.KegiatanService])

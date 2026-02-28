@@ -17,13 +17,14 @@ let MitraModule = class MitraModule {
 exports.MitraModule = MitraModule;
 exports.MitraModule = MitraModule = __decorate([
     (0, common_1.Module)({
-        providers: [mitra_service_1.MitraService,
+        providers: [
+            mitra_service_1.MitraService,
             {
                 provide: core_1.APP_GUARD,
                 useClass: auth_guard_1.AuthGuard,
             },
         ],
-        controllers: [mitra_controller_1.MitraController]
+        controllers: [mitra_controller_1.MitraController],
     })
 ], MitraModule);
 //# sourceMappingURL=mitra.module.js.map

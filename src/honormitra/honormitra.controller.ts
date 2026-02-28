@@ -3,41 +3,40 @@ import { HonormitraService } from './honormitra.service';
 
 @Controller('honormitra')
 export class HonormitraController {
-    constructor(private readonly honorMitraService: HonormitraService){}
+  constructor(private readonly honorMitraService: HonormitraService) {}
 
-    @Get()
-    async getHonorMitra(){
-        const honorMitra = await this.honorMitraService.getHonorMitra()
-        
-        return {
-            status_code: 200,
-            message: 'Succes get all movies',
-            data: honorMitra,
-        };
-    }
+  @Get()
+  async getHonorMitra(@Query('year') year?: string) {
+    const honorMitra = await this.honorMitraService.getHonorMitra({ year });
+    return {
+      status_code: 200,
+      message: 'Succes get all honor mitra',
+      data: honorMitra,
+    };
+  }
 
-    @Get('rekap/:year')
-    async getRekapHonorPerBulan(@Param('year') year: string) {
-        const selectedYear = parseInt(year);
+  @Get('rekap/:year')
+  async getRekapHonorPerBulan(@Param('year') year: string) {
+    const selectedYear = parseInt(year);
 
-        const rekapHonorPerBulan = await this.honorMitraService.getRekapHonorPerBulan(selectedYear);
-        return {
-            status_code: 200,
-            message: 'Succes get rekap honor per bulan',
-            data: rekapHonorPerBulan,
-        };
-    }
+    const rekapHonorPerBulan = await this.honorMitraService.getRekapHonorPerBulan(selectedYear);
+    return {
+      status_code: 200,
+      message: 'Succes get rekap honor per bulan',
+      data: rekapHonorPerBulan,
+    };
+  }
 
-    @Get('kegiatan')
-    async getHonorMitraWithKegiatan(
-        @Query('year') year?  : string,
-        @Query('month') month? : string
-    ){
-        const honorMitraWithKegiatan = await this.honorMitraService.getHonorMitraWithKegiatan({year, month});
-        return {
-            status_code: 200,
-            message: 'Succes get rekap honor per bulan',
-            data: honorMitraWithKegiatan,
-        };
-    }
+  @Get('kegiatan')
+  async getHonorMitraWithKegiatan(@Query('year') year?: string, @Query('month') month?: string) {
+    const honorMitraWithKegiatan = await this.honorMitraService.getHonorMitraWithKegiatan({
+      year,
+      month,
+    });
+    return {
+      status_code: 200,
+      message: 'Succes get rekap honor per bulan',
+      data: honorMitraWithKegiatan,
+    };
+  }
 }

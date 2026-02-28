@@ -24,7 +24,7 @@ exports.FilesModule = FilesModule = __decorate([
                 useClass: auth_guard_1.AuthGuard,
             },
         ],
-        controllers: [files_controller_1.FilesController]
+        controllers: [files_controller_1.FilesController],
     })
 ], FilesModule);
 //# sourceMappingURL=files.module.js.map

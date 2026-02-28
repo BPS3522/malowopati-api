@@ -5,13 +5,14 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { HonormitraController } from './honormitra.controller';
 
 @Module({
-  providers: [HonormitraService,
+  providers: [
+    HonormitraService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
   ],
   controllers: [HonormitraController],
-  imports: [HonormitraModule], 
+  imports: [HonormitraModule],
 })
 export class HonormitraModule {}

@@ -21,12 +21,26 @@ const honormitra_module_1 = require("./honormitra/honormitra.module");
 const kegiatan_module_1 = require("./kegiatan/kegiatan.module");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
+const keuangan_module_1 = require("./keuangan/keuangan.module");
+const filters_module_1 = require("./filters/filters.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, mitra_module_1.MitraModule, kegiatanmitra_module_1.KegiatanmitraModule, batashonor_module_1.BatashonorModule, files_module_1.FilesModule, honormitra_module_1.HonormitraModule, kegiatan_module_1.KegiatanModule, auth_module_1.AuthModule, users_module_1.UsersModule],
+        imports: [
+            prisma_module_1.PrismaModule,
+            mitra_module_1.MitraModule,
+            kegiatanmitra_module_1.KegiatanmitraModule,
+            batashonor_module_1.BatashonorModule,
+            files_module_1.FilesModule,
+            honormitra_module_1.HonormitraModule,
+            kegiatan_module_1.KegiatanModule,
+            auth_module_1.AuthModule,
+            users_module_1.UsersModule,
+            keuangan_module_1.KeuanganModule,
+            filters_module_1.FiltersModule,
+        ],
         controllers: [app_controller_1.AppController, honormitra_controller_1.HonormitraController],
         providers: [app_service_1.AppService, honormitra_service_1.HonormitraService],
     })

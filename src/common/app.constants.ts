@@ -1,5 +1,6 @@
-export const ROLES ={
-    PCL : 'pcl',
-    PML : 'pml',
-    PENGOLAH : 'pengolah'
+export enum Role {
+  Bendahara = 'Bendahara',
+  PPK = 'PPK',
+  PPSPM = 'PPSPM',
+  Umum = 'Umum',
 }

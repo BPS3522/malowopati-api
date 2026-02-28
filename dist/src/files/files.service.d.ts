@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { FileResponseDto } from '../dto/file.dto';
+import { FileResponseDto } from './dto/file.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 export declare class FilesService {
     private prisma;

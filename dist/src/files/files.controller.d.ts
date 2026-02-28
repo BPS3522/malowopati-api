@@ -1,6 +1,6 @@
 import type { Response } from 'express';
 import { FilesService } from './files.service';
-import { FileUploadDto, FileResponseDto } from '../dto/file.dto';
+import { FileUploadDto, FileResponseDto } from './dto/file.dto';
 export declare class FilesController {
     private readonly filesService;
     constructor(filesService: FilesService);

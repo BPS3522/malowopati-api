@@ -1,0 +1,30 @@
+-- CreateTable
+CREATE TABLE "public"."Keuangan" (
+    "id" SERIAL NOT NULL,
+    "tim" TEXT NOT NULL,
+    "bulan_kegiatan" TEXT NOT NULL,
+    "group_pok" TEXT NOT NULL,
+    "detail" TEXT NOT NULL,
+    "nomor_permintaan" INTEGER NOT NULL,
+    "deskripsi" TEXT NOT NULL,
+    "nomor_surat" TEXT NOT NULL,
+    "tipe_form" TEXT NOT NULL,
+    "dibuat_oleh" TEXT NOT NULL,
+    "jumlah_usulan" INTEGER NOT NULL,
+    "link_scan" TEXT NOT NULL,
+    "bulan_pembayaran" TEXT NOT NULL,
+    "teknis_kirim_ke_umum" TIMESTAMP(3) NOT NULL,
+    "ppk_cek_dokumen" TEXT,
+    "ppk_kirim_ke_ppspm" TIMESTAMP(3),
+    "ppspm_cek_dokumen" TEXT,
+    "ppspm_kirim_ke_bendahara" TIMESTAMP(3),
+    "bendahara_bayar" TEXT,
+    "no_spp" TEXT,
+    "tanggal_spp" TIMESTAMP(3),
+    "rekap_bos" TEXT,
+    "realisasi_bos" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Keuangan_pkey" PRIMARY KEY ("id")
+);

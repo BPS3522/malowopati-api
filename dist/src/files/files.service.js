@@ -29,8 +29,8 @@ let FilesService = class FilesService {
                 size: file.size,
                 path: file.path,
                 uploadDate: new Date(),
-                description: description
-            }
+                description: description,
+            },
         });
     }
     async getFilePath(filename) {

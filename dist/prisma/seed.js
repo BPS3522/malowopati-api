@@ -85,7 +85,23 @@ async function main() {
         const usersSeed = [
             {
                 username: 'bpsbojonegoro',
-                password: await bcrypt.hash("Sem4ng4t45", 10)
+                password: await bcrypt.hash("statistik3522", 10)
+            },
+            {
+                username: 'bendahara',
+                password: await bcrypt.hash("statistik3522", 10)
+            },
+            {
+                username: 'umum',
+                password: await bcrypt.hash("statistik3522", 10)
+            },
+            {
+                username: 'ppk',
+                password: await bcrypt.hash("statistik3522", 10)
+            },
+            {
+                username: 'ppspm',
+                password: await bcrypt.hash("statistik3522", 10)
             }
         ];
         try {

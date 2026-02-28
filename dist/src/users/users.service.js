@@ -20,8 +20,8 @@ let UsersService = class UsersService {
     async findOne(username) {
         return this.prisma.users.findFirst({
             where: {
-                username: username
-            }
+                username: username,
+            },
         });
     }
     async getAll() {

@@ -12,6 +12,6 @@ import { APP_GUARD } from '@nestjs/core';
       useClass: AuthGuard,
     },
   ],
-  controllers: [FilesController]
+  controllers: [FilesController],
 })
 export class FilesModule {}

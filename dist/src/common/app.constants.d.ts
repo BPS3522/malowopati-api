@@ -1,5 +1,6 @@
-export declare const ROLES: {
-    PCL: string;
-    PML: string;
-    PENGOLAH: string;
-};
+export declare enum Role {
+    Bendahara = "Bendahara",
+    PPK = "PPK",
+    PPSPM = "PPSPM",
+    Umum = "Umum"
+}

@@ -6,10 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const validation_pipe_1 = require("@nestjs/common/pipes/validation.pipe");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
-        origin: ['https://malowopati.web.bps.go.id', "http://localhost:8081"],
+        origin: ['https://malowopati.web.bps.go.id', 'http://localhost:8080'],
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     });
@@ -21,6 +22,14 @@ async function bootstrap() {
         next();
     });
     app.use((0, cookie_parser_1.default)());
+    app.useGlobalPipes(new validation_pipe_1.ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        transformOptions: {
+            enableImplicitConversion: true,
+        },
+    }));
     app.setGlobalPrefix('api6');
     await app.listen(process.env.PORT ?? 3000);
 }

@@ -17,31 +17,27 @@ let HonormitraService = class HonormitraService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    rupiahFormatter = new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
+    rupiahFormatter = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
         minimumFractionDigits: 0,
     });
     formatRupiah(value) {
         return this.rupiahFormatter.format(value);
     }
-    async getHonorMitra(search = '') {
-        const where = search
-            ? {
-                mitra: {
-                    namaLengkap: {
-                        contains: search,
-                    }
-                }
-            }
-            : {};
+    async getHonorMitra(filters) {
+        const { year } = filters;
         const honorMitra = await this.prisma.mitra.findMany({
             select: {
                 id: true,
                 namaLengkap: true,
                 sobatId: true,
-                honors: true
-            }
+                honors: {
+                    where: {
+                        ...(year ? { tahun: Number(year) } : {}),
+                    },
+                },
+            },
         });
         const detailHonorData = honorMitra.map((item) => {
             const latestHonor = item.honors[item.honors.length - 1] || {};
@@ -65,7 +61,18 @@ let HonormitraService = class HonormitraService {
         });
         const detailHonorDataWithTotal = detailHonorData.map((item) => ({
             ...item,
-            total: item.januari + item.februari + item.maret + item.april + item.mei + item.juni + item.juli + item.agustus + item.september + item.oktober + item.november + item.desember
+            total: item.januari +
+                item.februari +
+                item.maret +
+                item.april +
+                item.mei +
+                item.juni +
+                item.juli +
+                item.agustus +
+                item.september +
+                item.oktober +
+                item.november +
+                item.desember,
         }));
         const result = detailHonorDataWithTotal.sort((a, b) => b.total - a.total);
         return result;
@@ -79,17 +86,17 @@ let HonormitraService = class HonormitraService {
                         KegiatanMitra: {
                             where: {
                                 ...(year ? { tahun: Number(year) } : {}),
-                                ...(month ? { bulan: month } : {})
-                            }
+                                ...(month ? { bulan: month } : {}),
+                            },
                         },
                     },
                 },
                 honors: {
                     where: {
-                        ...(year ? { tahun: Number(year) } : {})
-                    }
-                }
-            }
+                        ...(year ? { tahun: Number(year) } : {}),
+                    },
+                },
+            },
         });
         const sortedData = dataMitra.sort((a, b) => {
             return b._count.KegiatanMitra - a._count.KegiatanMitra;
@@ -120,19 +127,17 @@ let HonormitraService = class HonormitraService {
                 sobatId: item.sobatId,
                 namaLengkap: item.namaLengkap,
                 jumlahKegiatan: item._count.KegiatanMitra,
-                honor
+                honor,
             };
         });
-        const top10 = formattedData
-            .sort((a, b) => b.honor - a.honor)
-            .slice(0, 10);
+        const top10 = formattedData.sort((a, b) => b.honor - a.honor).slice(0, 10);
         return top10;
     }
     async getRekapHonorPerBulan(selectedYear) {
         const rekapPerbulan = await this.prisma.honor.findMany({
             where: {
-                tahun: selectedYear
-            }
+                tahun: selectedYear,
+            },
         });
         const totalPerBulan = {
             januari: 0,
@@ -146,7 +151,7 @@ let HonormitraService = class HonormitraService {
             september: 0,
             oktober: 0,
             november: 0,
-            desember: 0
+            desember: 0,
         };
         rekapPerbulan.forEach((honor) => {
             totalPerBulan.januari += honor.januari;
@@ -164,7 +169,7 @@ let HonormitraService = class HonormitraService {
         });
         const result = Object.entries(totalPerBulan).map(([bulan, total]) => ({
             bulan: bulan.charAt(0).toUpperCase() + bulan.slice(1),
-            total: total
+            total: total,
         }));
         return result;
     }

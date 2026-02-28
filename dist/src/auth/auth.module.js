@@ -15,12 +15,14 @@ const constants_1 = require("./constants");
 const jwt_1 = require("@nestjs/jwt");
 const core_1 = require("@nestjs/core");
 const auth_guard_1 = require("./auth.guard");
+const prisma_module_1 = require("../prisma/prisma.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            prisma_module_1.PrismaModule,
             users_module_1.UsersModule,
             jwt_1.JwtModule.register({
                 global: true,

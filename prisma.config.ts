@@ -5,6 +5,6 @@ dotenv.config(); // load .env sebelum export config
 
 export default defineConfig({
   migrations: {
-    seed: `ts-node prisma/seed.ts`,
+    //seed: `ts-node prisma/seed.ts`,
   },
 });

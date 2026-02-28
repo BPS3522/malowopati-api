@@ -39,6 +39,7 @@ let AuthGuard = class AuthGuard {
                 secret: constants_1.jwtConstants.secret,
             });
             request['user'] = payload;
+            request['role'] = payload.roles;
         }
         catch {
             throw new common_1.UnauthorizedException();
@@ -53,6 +54,7 @@ let AuthGuard = class AuthGuard {
 exports.AuthGuard = AuthGuard;
 exports.AuthGuard = AuthGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [jwt_1.JwtService, core_1.Reflector])
+    __metadata("design:paramtypes", [jwt_1.JwtService,
+        core_1.Reflector])
 ], AuthGuard);
 //# sourceMappingURL=auth.guard.js.map

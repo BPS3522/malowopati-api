@@ -55,7 +55,23 @@ async function main() {
     const usersSeed=[
       {
         username : 'bpsbojonegoro',
-        password: await bcrypt.hash("Sem4ng4t45", 10)
+        password: await bcrypt.hash("statistik3522", 10)
+      },
+      {
+        username : 'bendahara',
+        password: await bcrypt.hash("statistik3522", 10)
+      },
+      {
+        username : 'umum',
+        password: await bcrypt.hash("statistik3522", 10)
+      },
+      {
+        username : 'ppk',
+        password: await bcrypt.hash("statistik3522", 10)
+      },
+      {
+        username : 'ppspm',
+        password: await bcrypt.hash("statistik3522", 10)
       }
     ]
       try {
@@ -71,6 +87,67 @@ async function main() {
       await prisma.$disconnect();
     }
   }
+
+  //   async function roleSeed(){
+  //   const rolesSeed=[
+  //     {
+  //       name : 'Bendahara',
+  //       kode: 2001
+  //     },
+  //     {
+  //       name : 'PPK',
+  //       kode: 2002
+  //     },
+  //     {
+  //       name : 'PPSPM',
+  //       kode: 2003
+  //     },
+  //     {
+  //       name : 'Umum',
+  //       kode: 2004
+  //     },
+  //   ]
+  //     try {
+  //       await prisma.users.deleteMany()
+  //   const result = await prisma.roles.createMany({
+  //     data: rolesSeed,
+  //   });
+  //     console.log(`Seeding complete. ${result.count} roles created.`);
+  //   } catch (e) {
+  //     console.error('Seeding failed:', e);
+  //   } finally {
+  //     console.log('✅ Seed Roles selesai.');
+  //     await prisma.$disconnect();
+  //   }
+  // }
+
+  
+// async function usersRolesSeed() {
+//   const users = await prisma.users.findMany();
+//   const roles = await prisma.roles.findMany();
+
+//   const relations = [
+//     { username: 'bendahara', roleName: 'Bendahara' },
+//     { username: 'ppk', roleName: 'PPK' },
+//     { username: 'ppspm', roleName: 'PPSPM' },
+//     { username: 'umum', roleName: 'Umum' },
+//     { username: 'bpsbojonegoro', roleName: 'Umum' },
+//   ];
+
+//   const usersRolesSeed = relations.map((rel) => {
+//     const user = users.find((u) => u.username === rel.username);
+//     const role = roles.find((r) => r.name === rel.roleName);
+//     if (!user || !role) throw new Error(`Data tidak ditemukan untuk ${rel.username} atau ${rel.roleName}`);
+//     return {
+//       userId: user.id,
+//       rolesId: role.id,
+//     };
+//   });
+
+//   await prisma.usersRoles.deleteMany();
+//   const result = await prisma.usersRoles.createMany({ data: usersRolesSeed });
+//   console.log(`✅ ${result.count} user-role relations created.`);
+// }
 
   //Seed Batas Honor Mitra
   // const batasHonor = new Promise<void>((resolve, reject) => {
@@ -136,6 +213,8 @@ async function main() {
   // });
   
   usersSeed()
+  //roleSeed()
+  //usersRolesSeed()
   await Promise.all([mitraPromise]);
 }
 

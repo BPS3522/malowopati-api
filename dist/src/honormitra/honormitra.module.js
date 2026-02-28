@@ -17,7 +17,8 @@ let HonormitraModule = class HonormitraModule {
 exports.HonormitraModule = HonormitraModule;
 exports.HonormitraModule = HonormitraModule = __decorate([
     (0, common_1.Module)({
-        providers: [honormitra_service_1.HonormitraService,
+        providers: [
+            honormitra_service_1.HonormitraService,
             {
                 provide: core_1.APP_GUARD,
                 useClass: auth_guard_1.AuthGuard,

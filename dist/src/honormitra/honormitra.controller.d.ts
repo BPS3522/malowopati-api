@@ -2,7 +2,7 @@ import { HonormitraService } from './honormitra.service';
 export declare class HonormitraController {
     private readonly honorMitraService;
     constructor(honorMitraService: HonormitraService);
-    getHonorMitra(): Promise<{
+    getHonorMitra(year?: string): Promise<{
         status_code: number;
         message: string;
         data: {

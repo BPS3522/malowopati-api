@@ -13,19 +13,21 @@ const kegiatan_controller_1 = require("./kegiatan.controller");
 const kegiatanmitra_module_1 = require("../kegiatanmitra/kegiatanmitra.module");
 const core_1 = require("@nestjs/core");
 const auth_guard_1 = require("../auth/auth.guard");
+const filters_module_1 = require("../filters/filters.module");
 let KegiatanModule = class KegiatanModule {
 };
 exports.KegiatanModule = KegiatanModule;
 exports.KegiatanModule = KegiatanModule = __decorate([
     (0, common_1.Module)({
-        providers: [kegiatan_service_1.KegiatanService,
+        providers: [
+            kegiatan_service_1.KegiatanService,
             {
                 provide: core_1.APP_GUARD,
                 useClass: auth_guard_1.AuthGuard,
             },
         ],
         controllers: [kegiatan_controller_1.KegiatanController],
-        imports: [kegiatanmitra_module_1.KegiatanmitraModule],
+        imports: [kegiatanmitra_module_1.KegiatanmitraModule, filters_module_1.FiltersModule],
     })
 ], KegiatanModule);
 //# sourceMappingURL=kegiatan.module.js.map

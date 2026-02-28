@@ -15,8 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.KegiatanmitraController = void 0;
 const common_1 = require("@nestjs/common");
 const kegiatanmitra_service_1 = require("./kegiatanmitra.service");
-const kegiatanmitra_dto_1 = require("./dto/kegiatanmitra.dto");
+const create_kegiatan_mitra_dto_1 = require("./dto/create-kegiatan-mitra.dto");
 const platform_express_1 = require("@nestjs/platform-express");
+const download_kegiatan_mitra_dto_1 = require("./dto/download-kegiatan-mitra.dto");
+const delete_kegiatan_mitra_dto_1 = require("./dto/delete-kegiatan-mitra.dto");
 let KegiatanmitraController = class KegiatanmitraController {
     KegiatanmitraService;
     constructor(KegiatanmitraService) {
@@ -37,6 +39,19 @@ let KegiatanmitraController = class KegiatanmitraController {
             message: 'Kegiatan Mitra berhasil dibuat',
             data: response,
         };
+    }
+    async editKegiatanMitra(editKegiatanMitra) {
+        try {
+            const response = await this.KegiatanmitraService.editKegiatanMitra(editKegiatanMitra);
+            return {
+                status_code: 200,
+                message: 'Kegiatan Mitra berhasil diupdate',
+                data: response,
+            };
+        }
+        catch (error) {
+            throw new common_1.BadRequestException('Edit Gagal');
+        }
     }
     async uploadTemplate(file) {
         if (!file) {
@@ -68,16 +83,26 @@ let KegiatanmitraController = class KegiatanmitraController {
     }
     async countMitraKegiatanHonor(year, month, idSobat) {
         const tahun = Number(year);
-        const result = await this.KegiatanmitraService.countMitraKegiatanHonor({ year, month, idSobat });
+        const result = await this.KegiatanmitraService.countMitraKegiatanHonor({
+            year,
+            month,
+            idSobat,
+        });
         return {
             status_code: 200,
             message: 'Get jumlah kegiatan mitra success',
             data: result,
         };
     }
-    async getKegiatanMitraById(id) {
-        const idMitra = Number(id);
-        return this.KegiatanmitraService.getKegiatanMitraById(idMitra);
+    async downloadKegiatanMitra(query) {
+        const result = this.KegiatanmitraService.downloadKegiatanMitra(query);
+        return result;
+    }
+    async getKegiatanMitraById(idSobat, year, month) {
+        const bulan = month;
+        const tahun = Number(year);
+        const id = Number(idSobat);
+        return this.KegiatanmitraService.getKegiatanMitraById({ id, tahun, bulan });
     }
     async deleteKegiatanMitra(kegiatanMitraDto) {
         const { id } = kegiatanMitraDto;
@@ -107,9 +132,16 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [kegiatanmitra_dto_1.KegiatanMitraDto]),
+    __metadata("design:paramtypes", [create_kegiatan_mitra_dto_1.KegiatanMitraDto]),
     __metadata("design:returntype", Promise)
 ], KegiatanmitraController.prototype, "createKegiatanMitra", null);
+__decorate([
+    (0, common_1.Patch)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], KegiatanmitraController.prototype, "editKegiatanMitra", null);
 __decorate([
     (0, common_1.Post)('upload'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
@@ -142,17 +174,29 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], KegiatanmitraController.prototype, "countMitraKegiatanHonor", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)('download'),
+    (0, common_1.UsePipes)(new common_1.ValidationPipe({
+        transform: true,
+    })),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [download_kegiatan_mitra_dto_1.DownloadKegiatanMitraQueryDto]),
+    __metadata("design:returntype", Promise)
+], KegiatanmitraController.prototype, "downloadKegiatanMitra", null);
+__decorate([
+    (0, common_1.Get)(':idSobat'),
+    __param(0, (0, common_1.Param)('idSobat', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('year')),
+    __param(2, (0, common_1.Query)('month')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String]),
     __metadata("design:returntype", Promise)
 ], KegiatanmitraController.prototype, "getKegiatanMitraById", null);
 __decorate([
     (0, common_1.Delete)('delete'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [kegiatanmitra_dto_1.KegiatanMitraDto]),
+    __metadata("design:paramtypes", [delete_kegiatan_mitra_dto_1.DeleteKegiatanMitra]),
     __metadata("design:returntype", Promise)
 ], KegiatanmitraController.prototype, "deleteKegiatanMitra", null);
 exports.KegiatanmitraController = KegiatanmitraController = __decorate([

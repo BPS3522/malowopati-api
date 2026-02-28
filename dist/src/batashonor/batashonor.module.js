@@ -24,7 +24,7 @@ exports.BatashonorModule = BatashonorModule = __decorate([
                 provide: core_1.APP_GUARD,
                 useClass: auth_guard_1.AuthGuard,
             },
-        ]
+        ],
     })
 ], BatashonorModule);
 //# sourceMappingURL=batashonor.module.js.map

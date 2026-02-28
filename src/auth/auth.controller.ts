@@ -1,5 +1,15 @@
-
-import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards,Request, Get, Res, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Request,
+  Get,
+  Res,
+  Req,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './constants';
 import type { Response } from 'express';
@@ -11,7 +21,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: Record<string, any>, @Res({passthrough:true}) res :Response) {
+  signIn(@Body() signInDto: Record<string, any>, @Res({ passthrough: true }) res: Response) {
     return this.authService.signIn(signInDto.username, signInDto.password, res);
   }
 
@@ -27,7 +37,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout(@Request() req, @Res({passthrough: true}) res: Response){
-    return this.authService.logout(req,res)
+  logout(@Request() req, @Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(req, res);
   }
 }

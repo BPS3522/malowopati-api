@@ -1,17 +1,17 @@
-import {IsOptional, isString, IsString} from 'class-validator'
+import { IsOptional, isString, IsString } from 'class-validator';
 
-export class BatasHonorDto{
-    id : number
+export class BatasHonorDto {
+  id: number;
 
-    @IsString()
-    nama_posisi : string
+  @IsString()
+  nama_posisi: string;
 
-    biaya : number
+  biaya: number;
 
-    @IsString()
-    @IsOptional()
-    keterangan : string
+  @IsString()
+  @IsOptional()
+  keterangan: string;
 
-    @IsOptional()
-    flag : number
+  @IsOptional()
+  flag: number;
 }

@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants, refreshJwtConstants } from './constants';
@@ -11,7 +16,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private prismaService: PrismaService
+    private prismaService: PrismaService,
   ) {}
 
   async signIn(username: string, pass: string, res: Response): Promise<any> {
@@ -24,47 +29,66 @@ export class AuthService {
       throw new NotFoundException('User tidak ditemukan');
     }
 
-    const isPasswordValid = await bcrypt.compare(pass, user.password)
+    const roles = await this.prismaService.usersRoles.findMany({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        role: true,
+      },
+    });
+
+    const isPasswordValid = await bcrypt.compare(pass, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Password salah');
     }
 
-    const payload = { sub: user.id, username: user.username };
+    const payload = {
+      sub: user.id,
+      username: user.username,
+      roles: roles.map((r) => r.role.name),
+    };
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: jwtConstants.secret,
-      expiresIn: '20s',
+      expiresIn: '60s',
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: refreshJwtConstants.secret,
       expiresIn: '1d',
     });
-    
+
     const hashedRefresh = await bcrypt.hash(refreshToken, 10);
 
-    await this.prismaService.tokens.create({ // Simpan refresh token di DB
-      data:{
+    await this.prismaService.tokens.create({
+      // Simpan refresh token di DB
+      data: {
         token: hashedRefresh,
         device: 'Chrome Windows',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        userId: user.id
-      }
-    })
+        userId: user.id,
+      },
+    });
 
     const cookie = res.cookie('jwt', refreshToken, {
-        httpOnly: true,
-        secure : true,
-        sameSite: "none",
-        maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 24 * 60 * 60 * 1000,
     });
-    
+
     return {
       access_token: accessToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        roles: payload.roles,
+      },
     };
   }
 
-async refresh(req: any, res: Response) {
+  async refresh(req: any, res: Response) {
     const cookies = req.cookies;
     if (!cookies?.jwt) {
       throw new ForbiddenException('Refresh token tidak ditemukan');
@@ -74,9 +98,9 @@ async refresh(req: any, res: Response) {
 
     try {
       const decoded = this.jwtService.verify(refreshToken, { secret: refreshJwtConstants.secret });
-      
+
       const tokens = await this.prismaService.tokens.findMany({
-        where: { userId: decoded.sub }
+        where: { userId: decoded.sub },
       });
 
       let isValid = false;
@@ -92,12 +116,11 @@ async refresh(req: any, res: Response) {
       }
 
       const newAccessToken = this.jwtService.sign(
-        { sub: decoded.sub, username: decoded.username },
-        { secret: jwtConstants.secret, expiresIn: '30s' },
+        { sub: decoded.sub, username: decoded.username, roles: decoded.roles },
+        { secret: jwtConstants.secret, expiresIn: '60s' },
       );
 
       return { access_token: newAccessToken };
-
     } catch (err) {
       if (err.name === 'TokenExpiredError') {
         throw new ForbiddenException('Refresh token kedaluwarsa. Silakan login ulang.');
@@ -106,10 +129,10 @@ async refresh(req: any, res: Response) {
     }
   }
 
-  async logout(req: any, res: Response){
+  async logout(req: any, res: Response) {
     const cookies = req.cookies;
     if (!cookies?.jwt) res.sendStatus(204);
-    const id = req.user.id
+    const id = req.user.id;
 
     const refreshToken = cookies.jwt;
 
@@ -117,15 +140,16 @@ async refresh(req: any, res: Response) {
       where: { id },
     });
 
-    for (const t of tokens) { // Delete refresh token in DB
+    for (const t of tokens) {
+      // Delete refresh token in DB
       if (await bcrypt.compare(refreshToken, t.token)) {
         await this.prismaService.tokens.delete({ where: { id: t.id } });
         break;
       }
     }
 
-    res.clearCookie('jwt', {httpOnly: true});
+    res.clearCookie('jwt', { httpOnly: true });
 
-    return res.statusMessage= "Berhasil logout";
+    return (res.statusMessage = 'Berhasil logout');
   }
 }
