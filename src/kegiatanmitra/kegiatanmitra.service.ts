@@ -33,6 +33,7 @@ import {
   Tanggal_Selesai,
   Tim,
 } from './enum/kolom-excel.enum';
+import { generateKey } from 'crypto';
 
 @Injectable()
 export class KegiatanmitraService {
@@ -84,8 +85,10 @@ export class KegiatanmitraService {
     const data = await this.prisma.kegiatanMitra.findMany({
       orderBy: { [sortBy || 'id']: direction },
       where: {
-        ...(filterBy ? { tahun: { in: filterBy.map(Number) } } : {}),
-      },
+        ...(filterBy
+          ? { tahun: { in: (Array.isArray(filterBy) ? filterBy : [filterBy]).map(Number) } }
+          : {}),
+      }, // <-- TAMBAHKAN KURUNG KURAWAL DAN KOMA DI SINI
       select: {
         id: true,
         kegiatanMaster: true,
@@ -234,17 +237,29 @@ export class KegiatanmitraService {
 
   async editKegiatanMitra(dto: any) {
     try {
+      // 1. Ambil data lama
+      const oldData = await this.prisma.kegiatanMitra.findUnique({ where: { id: dto.id } });
+
+      // 2. Update data
       const kegiatanMitra = await this.prisma.kegiatanMitra.update({
-        where: {
-          id: dto.id,
-        },
+        where: { id: dto.id },
         data: dto,
       });
+
+      // 3. Update honor bulan/tahun yang BARU
       await this.updateHonorBulanTertentu(
         kegiatanMitra.id_sobat,
         kegiatanMitra.bulan,
         kegiatanMitra.tahun,
       );
+
+      // 4. Jika bulan atau tahun diubah, hitung ulang juga honor di bulan/tahun yang LAMA
+      if (
+        oldData &&
+        (oldData.bulan !== kegiatanMitra.bulan || oldData.tahun !== kegiatanMitra.tahun)
+      ) {
+        await this.updateHonorBulanTertentu(oldData.id_sobat, oldData.bulan, oldData.tahun);
+      }
 
       return kegiatanMitra;
     } catch (error) {
@@ -277,7 +292,7 @@ export class KegiatanmitraService {
       throw new NotFoundException(`Mitra dengan ID ${dto.kegiatanId} tidak ditemukan.`);
     }
 
-    const result = this.prisma.kegiatanMitra.create({
+    const result = await this.prisma.kegiatanMitra.create({
       data: {
         bulan: dataKegiatan.bulan,
         tanggal: dataKegiatan.tanggal,
@@ -365,7 +380,6 @@ export class KegiatanmitraService {
 
     const updateData: any = {};
     updateData[bulanKey] = totalHonor;
-
     await this.prisma.honor.upsert({
       where: {
         sobatId_tahun: {
@@ -550,7 +564,7 @@ export class KegiatanmitraService {
     return dataToProcess;
   }
 
-  generateKey(obj: any): crypto.BinaryLike {
+  generateKey(obj: any): string {
     const safeLower = (val: any) =>
       String(val ?? '')
         .toLowerCase()
@@ -744,39 +758,79 @@ export class KegiatanmitraService {
     );
 
     // helper
-    function generateKey(obj: any): string {
-      return `${obj.bulan}-
-            ${obj.bulan_angka}-
-            ${obj.tanggal}-
-            ${obj.tim}-
-            ${obj.nama_survei}-
-            ${obj.nama_survei_sobat}-
-            ${obj.kegiatan}-
-            ${obj.tahun}-
-            ${obj.judul}-
-            ${obj.jenis_kegiatan}-
-            ${obj.hari}-
-            ${obj.tanggal_mulai}-
-            ${obj.hari_selesai}-
-            ${obj.tanggal_selesai}
-            `;
-    }
-
+    // function generateKey(obj: any): string {
+    //   return `${obj.bulan}-
+    //         ${obj.bulan_angka}-
+    //         ${obj.tanggal}-
+    //         ${obj.tim}-
+    //         ${obj.nama_survei}-
+    //         ${obj.nama_survei_sobat}-
+    //         ${obj.kegiatan}-
+    //         ${obj.tahun}-
+    //         ${obj.judul}-
+    //         ${obj.jenis_kegiatan}-
+    //         ${obj.hari}-
+    //         ${obj.tanggal_mulai}-
+    //         ${obj.hari_selesai}-
+    //         ${obj.tanggal_selesai}
+    //         `;
+    // }
+    // Gunakan fungsi yang sudah ada di luar class
     try {
+      // 1. Looping kegiatanData
       const kodeKegiatanMap = new Map<string, string>();
       kegiatanData.forEach((keg) => {
-        const key = generateKey(keg);
+        const key = this.generateKey(keg);
         kodeKegiatanMap.set(key, keg.kodeKegiatan);
       });
 
+      // 2. Simpan ke tabel kegiatan
       await this.prisma.kegiatan.createMany({
         data: kegiatanData,
         skipDuplicates: true,
       });
 
-      const validData: Prisma.KegiatanMitraCreateManyInput[] = jsonExcel.map((row) => {
-        const key = generateKey(row);
+      // =================================================================
+      // 3. FITUR BARU: GENERATE NOMOR SPK OTOMATIS BERDASARKAN ABJAD
+      // =================================================================
+      const spkMap = new Map();
+      // Cari kombinasi bulan & tahun dari file excel
+      const unikBulanTahun = Array.from(
+        new Set(jsonExcel.map((r) => `${r.bulan_angka}-${r.tahun}`)),
+      );
+
+      unikBulanTahun.forEach((bt: string) => {
+        const [bulan_angka, tahun] = bt.split('-');
+
+        // Ambil daftar nama mitra unik pada bulan tersebut
+        const mitraUnik = Array.from(
+          new Set(
+            jsonExcel
+              .filter((r) => `${r.bulan_angka}-${r.tahun}` === bt)
+              .map((r) => JSON.stringify({ id: r.id_sobat, nama: r.nama_petugas })),
+          ),
+        ).map((str: any) => JSON.parse(str));
+
+        // Urutkan nama mitra sesuai abjad (A - Z)
+        mitraUnik.sort((a, b) => a.nama.localeCompare(b.nama));
+
+        // Berikan nomor urut SPK (Format BPS Bojonegoro: Urut/3522/SPK/Bulan/Tahun)
+        mitraUnik.forEach((mitra, index) => {
+          const noSPK = `${index + 1}/3522/SPK/${bulan_angka}/${tahun}`;
+          spkMap.set(`${mitra.id}-${bt}`, noSPK); // Simpan ke kamus sementara
+        });
+      });
+      // =================================================================
+
+      // 4. Mapping validData untuk disimpan ke database
+      const validData: any[] = jsonExcel.map((row) => {
+        const key = this.generateKey(row);
         const kegiatanId = kodeKegiatanMap.get(key) || null;
+
+        // Tarik nomor SPK otomatis yang sudah di-generate di atas
+        const spkKey = `${row.id_sobat}-${row.bulan_angka}-${row.tahun}`;
+        const autoSpk = spkMap.get(spkKey);
+
         return {
           bulan: row.bulan,
           tanggal: row.tanggal,
@@ -795,19 +849,28 @@ export class KegiatanmitraService {
           flag_sobat: row.flag_sobat,
           tahun: row.tahun,
           kegiatanId: kegiatanId,
-          no_kontrak_spk: row.no_kontrak_spk,
+          no_kontrak_spk: row.no_kontrak_spk || autoSpk, // <-- Jika di Excel kosong, pakai SPK Otomatis!
           no_kontrak_bast: row.no_kontrak_bast,
           no_urut_mitra: row.no_urut_mitra,
           kecamatan: row.kecamatan,
         };
       });
 
+      // 5. Simpan ke tabel kegiatanMitra (Tabel Rincian Bawah)
       const result = await this.prisma.kegiatanMitra.createMany({
         data: validData,
         skipDuplicates: true,
       });
+      // ... (Lanjutan kode perhitungan totalHonorAbsolut biarkan seperti aslinya)
+      // 5. Perhitungan Total Honor Absolut (Tabel Rekap Atas)
+      const uniqueMitraBulanTahun = Array.from(
+        new Set(validData.map((d) => `${d.id_sobat}|${d.bulan}|${d.tahun}`)),
+      );
 
-      await this.updateHonorPerBulan(validData);
+      for (const item of uniqueMitraBulanTahun) {
+        const [id_sobat, bulan, tahun] = item.split('|');
+        await this.updateHonorBulanTertentu(id_sobat, bulan, Number(tahun));
+      }
 
       return {
         statusCode: 200,
