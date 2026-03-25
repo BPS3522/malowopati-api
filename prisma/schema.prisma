@@ -33,6 +33,7 @@ model Mitra {
   noTelp             String?
   sobatId            String @unique
   email              String?
+  tahun              Int[]   @default([])
   honors Honor[]
   KegiatanMitra KegiatanMitra[]
 }
