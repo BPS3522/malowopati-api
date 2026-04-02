@@ -36,6 +36,7 @@ model Mitra {
   tahun              Int[]   @default([])
   honors Honor[]
   KegiatanMitra KegiatanMitra[]
+  evaluasi        EvaluasiMitra[]
 }
 
 model Honor {
@@ -200,4 +201,16 @@ model Keuangan{
 model Tahun {
   id Int @id @default(autoincrement())
   year Int
+}
+
+model EvaluasiMitra {
+  id    String @id @default(cuid())
+  sobatId String
+  bulan   String
+  tahun   Int
+  tim     String
+  nilai   Int
+  mitra   Mitra   @relation(fields: [sobatId], references: [sobatId], onDelete: Cascade)
+
+  @@unique([sobatId, bulan, tahun, tim])
 }

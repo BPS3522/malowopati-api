@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { KeuanganModule } from './keuangan/keuangan.module';
 import { FiltersModule } from './filters/filters.module';
+import { EvaluasiModule } from './evaluasi/evaluasi.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FiltersModule } from './filters/filters.module';
     UsersModule,
     KeuanganModule,
     FiltersModule,
+    EvaluasiModule,
   ],
   controllers: [AppController, HonormitraController],
   providers: [AppService, HonormitraService],
