@@ -34,6 +34,9 @@ import {
   Tim,
 } from './enum/kolom-excel.enum';
 import { generateKey } from 'crypto';
+import { get } from 'http';
+import { json } from 'stream/consumers';
+import { not } from 'rxjs/internal/util/not';
 
 @Injectable()
 export class KegiatanmitraService {
@@ -626,7 +629,10 @@ export class KegiatanmitraService {
       desember: 12,
     };
 
-    const jsonExcel = dataToProcess.map((row) => {
+    let noUrutMitraCounter = 0;
+    const seenNama = new Map();
+
+    let jsonExcel = dataToProcess.map((row, index) => {
       try {
         // helper
         function findValueRow(row: any, columnName: string) {
@@ -666,6 +672,27 @@ export class KegiatanmitraService {
 
           return 'PENDATAAN_LAPANGAN';
         }
+        //sudah bisa tapi belum kepake, harusnya kode ini tidak di sini, tapi di bawah pas pengecekan duplikat selesai
+
+        //   //helper
+        //   function generateKeyNama(nama: string): string {
+        //     return `
+        //     ${nama}
+        // `.replace(/\s+/g, '');
+        //   }
+
+        //   const keyNamaMitra = generateKeyNama(String(findValueRow(row, Nama_Mitra) || ''));
+
+        //   if (!seenNama.has(keyNamaMitra)) {
+        //     noUrutMitraCounter++;
+        //     seenNama.set(keyNamaMitra, noUrutMitraCounter);
+        //   }
+
+        //   const noUrutMitra = seenNama.get(keyNamaMitra);
+
+        //   console.log('keyNamaMitra:', keyNamaMitra);
+        //   console.log('seenNama:', seenNama);
+        //   console.log('noUrutMitra:', noUrutMitra);
 
         return {
           bulan: String(findValueRow(row, Bulan) || ''),
@@ -718,6 +745,105 @@ export class KegiatanmitraService {
         });
       }
     });
+
+    //helper, yg dipake nama petugas berarti nama petugasnya yang dirubah
+    function generateKeyDuplicateMitra(obj: any): string {
+      return `
+      ${obj.bulan}-
+      ${obj.bulan_angka}-
+      ${obj.tanggal}-
+      ${obj.tim}-
+      ${obj.nama_survei}-
+      ${obj.nama_survei_sobat}-
+      ${obj.kegiatan}-
+      ${obj.pcl_pml_olah}-
+      ${obj.nama_petugas}-
+      ${obj.satuan}-
+      ${obj.volum}-
+      ${obj.harga_per_satuan}-
+      ${obj.jumlah}-
+      ${obj.konfirmasi}-
+      ${obj.flag_sobat}-
+      ${obj.no_urut_mitra}-
+      ${obj.tahun}-
+      ${obj.judul}-
+      ${obj.hari}-
+      ${obj.tanggal_mulai}-
+      ${obj.hari_selesai}-
+      ${obj.tanggal_selesai}-
+      ${obj.jenis_kegiatan}-
+      ${obj.kecamatan}-
+      `.replace(/\s+/g, '');
+    }
+
+    const seen = new Map();
+
+    let notMatch = new Array<any>();
+    let validData = new Array<any>();
+    let index = 0;
+
+    for (const row of jsonExcel) {
+      try {
+        const dataMitra = await this.prisma.mitra.findFirst({
+          select: { namaLengkap: true, sobatId: true },
+          where: { sobatId: row.id_sobat },
+        });
+
+        if (dataMitra && row.nama_petugas !== dataMitra.namaLengkap) {
+          notMatch.push({ ...row });
+        } else {
+          validData.push({ ...row });
+          const key = generateKeyDuplicateMitra(row);
+          seen.set(key, index);
+        }
+        index++;
+      } catch (error) {
+        console.error('Error saat cek baris:', error);
+      }
+    }
+
+    //console.log(seen);
+
+    jsonExcel = validData;
+
+    //console.log(notMatch);
+
+    for (const row of notMatch) {
+      const keyjsonExcel = generateKeyDuplicateMitra(row);
+
+      if (seen.has(keyjsonExcel)) {
+        console.log('sudah ada key yang sama di jsonExcel');
+        const dataMitra = await this.prisma.mitra.findFirst({
+          select: { namaLengkap: true, sobatId: true },
+          where: { sobatId: row.id_sobat },
+        });
+        const updatedNotMatch = notMatch.map((r) => ({
+          ...r,
+          nama_petugas: dataMitra?.namaLengkap,
+        }));
+        jsonExcel.push(...updatedNotMatch);
+      } else {
+        // kalau ga ada yang sama biasnya petugas cenderung salah mengisi sobatID maka sobatID nya yg diganti
+        // console.log('sudah ada key yang sama di jsonExcel');
+        const dataMitra = await this.prisma.mitra.findFirst({
+          select: { namaLengkap: true, sobatId: true },
+          where: {
+            namaLengkap: {
+              equals: row.nama_petugas,
+              mode: 'insensitive',
+            },
+          },
+        });
+        const updatedNotMatch = notMatch.map((r) => ({
+          ...r,
+          id_sobat: dataMitra?.sobatId,
+        }));
+        jsonExcel.push(...updatedNotMatch);
+      }
+    }
+
+    // console.log('notMatch setelah update nama_petugas:', notMatch);
+    //console.log('jsonExcel setelah update nama_petugas:', jsonExcel);
 
     let kegiatanData: any[] = [];
     kegiatanData = await Promise.all(
