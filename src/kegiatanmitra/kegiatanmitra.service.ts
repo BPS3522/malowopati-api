@@ -782,6 +782,18 @@ export class KegiatanmitraService {
     let validData = new Array<any>();
     let index = 0;
 
+    //helper
+    function normalizeText(text: string) {
+      return text
+        ?.toLowerCase()
+        .trim()
+        .replace(/[’'`]/g, '')
+        .replace(/[.,]/g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim();
+    }
+
     for (const row of jsonExcel) {
       try {
         const dataMitra = await this.prisma.mitra.findFirst({
@@ -789,7 +801,7 @@ export class KegiatanmitraService {
           where: { sobatId: row.id_sobat },
         });
 
-        if (dataMitra && row.nama_petugas !== dataMitra.namaLengkap) {
+        if (dataMitra && normalizeText(row.nama_petugas) !== normalizeText(dataMitra.namaLengkap)) {
           notMatch.push({ ...row });
         } else {
           validData.push({ ...row });
@@ -801,7 +813,6 @@ export class KegiatanmitraService {
         console.error('Error saat cek baris:', error);
       }
     }
-
     //console.log(seen);
 
     jsonExcel = validData;
@@ -812,7 +823,7 @@ export class KegiatanmitraService {
       const keyjsonExcel = generateKeyDuplicateMitra(row);
 
       if (seen.has(keyjsonExcel)) {
-        console.log('sudah ada key yang sama di jsonExcel');
+        // console.log('sudah ada key yang sama di jsonExcel');
         const dataMitra = await this.prisma.mitra.findFirst({
           select: { namaLengkap: true, sobatId: true },
           where: { sobatId: row.id_sobat },
@@ -825,7 +836,7 @@ export class KegiatanmitraService {
       } else {
         // kalau ga ada yang sama biasnya petugas cenderung salah mengisi sobatID maka sobatID nya yg diganti
         // console.log('sudah ada key yang sama di jsonExcel');
-        const dataMitra = await this.prisma.mitra.findFirst({
+        let dataMitra = await this.prisma.mitra.findFirst({
           select: { namaLengkap: true, sobatId: true },
           where: {
             namaLengkap: {
@@ -834,11 +845,33 @@ export class KegiatanmitraService {
             },
           },
         });
-        const updatedNotMatch = notMatch.map((r) => ({
-          ...r,
-          id_sobat: dataMitra?.sobatId,
-        }));
-        jsonExcel.push(...updatedNotMatch);
+        if (!dataMitra) {
+          // kalau tetep null terpaksa pakai id_sobat yang ada
+          const lastName = row.nama_petugas.split(' ').pop();
+
+          dataMitra = await this.prisma.mitra.findFirst({
+            where: {
+              namaLengkap: {
+                contains: lastName,
+                mode: 'insensitive',
+              },
+            },
+          });
+
+          if (!dataMitra) {
+            const updatedNotMatch = notMatch.map((r) => ({
+              ...r,
+              id_sobat: row.id_sobat,
+            }));
+            jsonExcel.push(...updatedNotMatch);
+          } else {
+            const updatedNotMatch = notMatch.map((r) => ({
+              ...r,
+              id_sobat: String(dataMitra?.sobatId),
+            }));
+            jsonExcel.push(...updatedNotMatch);
+          }
+        }
       }
     }
 
